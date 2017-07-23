@@ -31,6 +31,17 @@ platform = mm.Platform.getPlatformByName('CPU')
 ### of the existing forces, you should do it here - after the
 ### System has been created, but before the Simulation is created.
 
+# Implemented option B, to create a merge conflict.
+def neutralizeCharge():
+    atoms = list(pdb.topology.atoms())
+    for f in system.getForces():
+        if isinstance(f, mm.NonbondedForce):
+            print("Found nonbonded force")
+            for i in range(f.getNumParticles()):
+                if atoms[i].residue.name != 'HOH':
+                    chg, sig, eps = f.getParticleParameters(i)
+                    f.setParticleParameters(i, 0.0, sig, eps)    
+
 # Create a Simulation object by putting together the objects above
 simulation = app.Simulation(pdb.topology, system, integrator, platform)
 
