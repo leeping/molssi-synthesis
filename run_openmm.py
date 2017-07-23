@@ -24,6 +24,13 @@ integrator = mm.LangevinIntegrator(300*unit.kelvin, 1.0/unit.picoseconds,
 # Add a Monte Carlo barostat to the system for pressure control
 system.addForce(mm.MonteCarloBarostat(1*unit.atmospheres, 300*unit.kelvin, 25))
 
+# Add a custom bonded force
+custom_bond = mm.CustomBondForce("0.5*k*(r-r0)^2")
+custom_bond.addGlobalParameter("k", 20)
+custom_bond.addGlobalParameter("r0", 2.5)
+custom_bond.addBond(1, 273)
+system.addForce(custom_bond)
+
 # Use the CPU platform
 platform = mm.Platform.getPlatformByName('CPU')
 
