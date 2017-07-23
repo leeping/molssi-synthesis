@@ -47,6 +47,7 @@ simulation.context.setVelocitiesToTemperature(300*unit.kelvin)
 # Add reporters to the simulation object, which do things at regular intervals
 # while the simulation is running.
 # This reporter creates a DCD trajectory file
+# A: Christian Bale
 simulation.reporters.append(app.DCDReporter('trajectory.dcd', 100))
 
 # This reporter prints information to the terminal
