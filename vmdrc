@@ -276,3 +276,5 @@ proc ss {molid} {
 
 # Go to the first frame    
 animate goto 0
+
+puts "LP's VMD startup file successfully loaded"
