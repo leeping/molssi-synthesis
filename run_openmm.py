@@ -39,7 +39,7 @@ simulation.context.setPositions(pdb.positions)
 
 # Minimize the energy of the system (intentionally doing a rough minimization)
 print('Minimizing...')
-simulation.minimizeEnergy(tolerance=100)
+simulation.minimizeEnergy(maxIterations=20, tolerance=100)
 
 # Initialize the random velocities of the system from a Maxwell-Boltzmann distribution
 simulation.context.setVelocitiesToTemperature(300*unit.kelvin)
