@@ -1,4 +1,3 @@
-from __future__ import print_function
 from simtk.openmm import app
 import simtk.openmm as mm
 from simtk import unit
@@ -51,11 +50,11 @@ simulation.context.setVelocitiesToTemperature(300*unit.kelvin)
 simulation.reporters.append(app.DCDReporter('trajectory.dcd', 100))
 
 # This reporter prints information to the terminal
-simulation.reporters.append(app.StateDataReporter(stdout, 100, step=True, 
+simulation.reporters.append(app.StateDataReporter(stdout, 500, step=True, 
     potentialEnergy=True, temperature=True, density=True, progress=True, 
-    remainingTime=True, speed=True, totalSteps=10000, separator='\t'))
+    remainingTime=True, speed=True, totalSteps=20000, separator='\t'))
 
 # Run the simulation itself
 print('Running Production...')
-simulation.step(10000)
+simulation.step(20000)
 print('Done!')
