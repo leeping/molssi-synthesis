@@ -1,4 +1,3 @@
-from __future__ import print_function
 from simtk.openmm import app
 import simtk.openmm as mm
 from simtk import unit
@@ -27,21 +26,14 @@ system.addForce(mm.MonteCarloBarostat(1*unit.atmospheres, 300*unit.kelvin, 25))
 # Use the CPU platform
 platform = mm.Platform.getPlatformByName('CPU')
 
-### If you want to add any forces to your System or modify any
-### of the existing forces, you should do it here - after the
-### System has been created, but before the Simulation is created.
-
-# Implemented option B, to create a merge conflict.
-def neutralizeCharge():
-    atoms = list(pdb.topology.atoms())
-    for f in system.getForces():
-        if isinstance(f, mm.NonbondedForce):
-            print("Found nonbonded force")
-            for i in range(f.getNumParticles()):
-                if atoms[i].residue.name != 'HOH':
-                    chg, sig, eps = f.getParticleParameters(i)
-                    f.setParticleParameters(i, 0.0, sig, eps)    
-
+def ZeroProteinCharges(a):
+    list = mm.System.getForces(a)
+    for i in list:
+        if isinstance(i, mm.NonbondedForce):
+            for l in range(2363):
+                a = mm.NonbondedForce.getParticleParameters(i,l)
+                mm.NonbondedForce.setParticleParameters(i,l,0,a[1], a[2])
+ZeroProteinCharges(system)
 # Create a Simulation object by putting together the objects above
 simulation = app.Simulation(pdb.topology, system, integrator, platform)
 
@@ -55,18 +47,29 @@ simulation.minimizeEnergy(maxIterations=20, tolerance=100)
 # Initialize the random velocities of the system from a Maxwell-Boltzmann distribution
 simulation.context.setVelocitiesToTemperature(300*unit.kelvin)
 
-# Add reporters to the simulation object, which do things at regular intervals
-# while the simulation is running.
-# This reporter creates a DCD trajectory file
+# *Incredibly Short* NPT equilibration (5 ps)
+# First, add reporters to the simulation object, which do things at regular intervals
+# while the simulation is running. This reporter prints information to the terminal.
+simulation.reporters.append(app.StateDataReporter(stdout, 100, step=True,
+    potentialEnergy=True, temperature=True, density=True, progress=True,
+    remainingTime=True, speed=True, totalSteps=2500, separator='\t'))
+# Next, run the equilibration simulation itself.
+print('Running Equilibration...')
+simulation.step(2500)
+
+# Production (40 ps)
+# Before doing anything, remember to clear the previous reporters. In the code below
+# the first reporter creates a DCD trajectory file. The second reporter is otherwise
+# very similar to the one above in the equilibration section. The only difference --
+# other than ouput frequency -- is that the totalSteps parameter is modified to be
+# the number of production steps + equilibration steps. Run the code to see why...
 # A: Christian Bale
+simulation.reporters.clear()
 simulation.reporters.append(app.DCDReporter('trajectory.dcd', 100))
-
-# This reporter prints information to the terminal
-simulation.reporters.append(app.StateDataReporter(stdout, 100, step=True, 
+simulation.reporters.append(app.StateDataReporter(stdout, 500, step=True, 
     potentialEnergy=True, temperature=True, density=True, progress=True, 
-    remainingTime=True, speed=True, totalSteps=10000, separator='\t'))
-
-# Run the simulation itself
+    remainingTime=True, speed=True, totalSteps=22500, separator='\t'))
+# Run the production simulation!
 print('Running Production...')
-simulation.step(10000)
+simulation.step(20000)
 print('Done!')
