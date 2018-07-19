@@ -43,18 +43,29 @@ simulation.minimizeEnergy(maxIterations=20, tolerance=100)
 # Initialize the random velocities of the system from a Maxwell-Boltzmann distribution
 simulation.context.setVelocitiesToTemperature(300*unit.kelvin)
 
-# Add reporters to the simulation object, which do things at regular intervals
-# while the simulation is running.
-# This reporter creates a DCD trajectory file
-# A: Christian Bale
-simulation.reporters.append(app.DCDReporter('trajectory.dcd', 100))
+# *Incredibly Short* NPT equilibration (5 ps)
+# First, add reporters to the simulation object, which do things at regular intervals
+# while the simulation is running. This reporter prints information to the terminal.
+simulation.reporters.append(app.StateDataReporter(stdout, 100, step=True,
+    potentialEnergy=True, temperature=True, density=True, progress=True,
+    remainingTime=True, speed=True, totalSteps=2500, separator='\t'))
+# Next, run the equilibration simulation itself.
+print('Running Equilibration...')
+simulation.step(2500)
 
-# This reporter prints information to the terminal
+# Production (40 ps)
+# Before doing anything, remember to clear the previous reporters. In the code below
+# the first reporter creates a DCD trajectory file. The second reporter is otherwise
+# very similar to the one above in the equilibration section. The only difference --
+# other than ouput frequency -- is that the totalSteps parameter is modified to be
+# the number of production steps + equilibration steps. Run the code to see why...
+# A: Christian Bale
+simulation.reporters.clear()
+simulation.reporters.append(app.DCDReporter('trajectory.dcd', 100))
 simulation.reporters.append(app.StateDataReporter(stdout, 500, step=True, 
     potentialEnergy=True, temperature=True, density=True, progress=True, 
-    remainingTime=True, speed=True, totalSteps=20000, separator='\t'))
-
-# Run the simulation itself
+    remainingTime=True, speed=True, totalSteps=22500, separator='\t'))
+# Run the production simulation!
 print('Running Production...')
 simulation.step(20000)
 print('Done!')
