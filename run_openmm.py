@@ -26,10 +26,14 @@ system.addForce(mm.MonteCarloBarostat(1*unit.atmospheres, 300*unit.kelvin, 25))
 # Use the CPU platform
 platform = mm.Platform.getPlatformByName('CPU')
 
-### If you want to add any forces to your System or modify any
-### of the existing forces, you should do it here - after the
-### System has been created, but before the Simulation is created.
-
+def ZeroProteinCharges(a):
+    list = mm.System.getForces(a)
+    for i in list:
+        if isinstance(i, mm.NonbondedForce):
+            for l in range(2363):
+                a = mm.NonbondedForce.getParticleParameters(i,l)
+                mm.NonbondedForce.setParticleParameters(i,l,0,a[1], a[2])
+ZeroProteinCharges(system)
 # Create a Simulation object by putting together the objects above
 simulation = app.Simulation(pdb.topology, system, integrator, platform)
 
